@@ -1,0 +1,81 @@
+.kanban-container {
+  padding: 20px;
+  background-color: #f7f7f7;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+}
+
+.control-group label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.kanban-board {
+  display: flex;
+  gap: 20px;
+}
+
+.kanban-column {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  flex: 1;
+}
+
+.column-title {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 5px;
+}
+
+.ticket-card {
+  background-color: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+  padding: 15px;
+}
+
+.ticket-card h4 {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+.ticket-card p {
+  font-size: 0.9rem;
+  margin: 2px 0;
+}
+
+.ticket-card:nth-child(2n) {
+  background-color: #f1f1f1;
+}
+
+/* Add responsiveness */
+@media (max-width: 768px) {
+  .kanban-board {
+    flex-direction: column;
+  }
+}
+
+.icon {
+  width: 20px; /* Adjust size as needed */
+  height: 20px; /* Adjust size as needed */
+  margin-right: 8px; /* Space between icon and text */
+}
