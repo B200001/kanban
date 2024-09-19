@@ -79,3 +79,47 @@ select {
   height: 20px; /* Adjust size as needed */
   margin-right: 8px; /* Space between icon and text */
 }
+/* KanbanBoard.css */
+.kanban-container {
+  padding: 20px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+}
+
+.select-with-icon {
+  display: flex;
+  align-items: center;
+}
+
+.kanban-board {
+  display: flex;
+  justify-content: space-between;
+}
+
+.kanban-column {
+  width: 30%;
+}
+
+.ticket-card {
+  background-color: #fff;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media only screen and (max-width: 768px) {
+  .kanban-column {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}

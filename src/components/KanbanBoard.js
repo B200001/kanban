@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./KanbanBoard.css"; // External CSS file for styling
+import "./KanbanBoard.css";
 
-// Import your icons
+// Import SVG icons as React components
 import { ReactComponent as StatusIcon } from './assets/Display.svg';
 import { ReactComponent as PriorityHigh } from './assets/Img - High Priority.svg';
 import { ReactComponent as PriorityMedium } from './assets/Img - Medium Priority.svg';
@@ -25,64 +25,88 @@ const KanbanBoard = () => {
   const [tickets, setTickets] = useState([]);
   const [groupBy, setGroupBy] = useState("Status");
   const [sortBy, setSortBy] = useState("Priority");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTickets = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(API_URL);
         if (response.data && Array.isArray(response.data.tickets)) {
           setTickets(response.data.tickets);
         } else {
-          console.error("Tickets data is not an array", response.data);
+          setError("Invalid response from the server");
         }
       } catch (error) {
-        console.error("Error fetching tickets:", error);
+        setError("Error fetching tickets");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTickets();
   }, []);
 
-  const groupTickets = (tickets, groupBy) => {
-    if (!Array.isArray(tickets)) return {};
-
-    switch (groupBy) {
-      case "Status":
-        return tickets.reduce((groups, ticket) => {
-          const group = ticket.status;
-          groups[group] = groups[group] || [];
-          groups[group].push(ticket);
-          return groups;
-        }, {});
-      case "User":
-        return tickets.reduce((groups, ticket) => {
-          const group = ticket.userId;
-          groups[group] = groups[group] || [];
-          groups[group].push(ticket);
-          return groups;
-        }, {});
-      case "Priority":
-        return tickets.reduce((groups, ticket) => {
-          const group = ticket.priority;
-          groups[group] = groups[group] || [];
-          groups[group].push(ticket);
-          return groups;
-        }, {});
-      default:
-        return {};
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Backlog": return <BacklogIcon />;
+      case "Cancelled": return <CancelledIcon />;
+      case "In Progress": return <InProgressIcon />;
+      case "Done": return <DoneIcon />;
+      default: return null;
     }
+  };
+
+  const getPriorityIcon = (priority) => {
+    switch (priority) {
+      case "High": return <PriorityHigh />;
+      case "Medium": return <PriorityMedium />;
+      case "Low": return <PriorityLow />;
+      case "Urgent": return <PriorityUrgentColor />;
+      default: return <NoPriorityIcon />;
+    }
+  };
+
+  const priorityOrder = {
+    "Urgent": 5,
+    "High": 4,
+    "Medium": 3,
+    "Low": 2,
+    "No Priority": 1,
   };
 
   const sortTickets = (tickets, sortBy) => {
     switch (sortBy) {
       case "Priority":
-        return tickets.sort((a, b) => b.priority - a.priority);
+        return tickets.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
       case "Title":
         return tickets.sort((a, b) => a.title.localeCompare(b.title));
       default:
         return tickets;
     }
   };
+
+  const groupTickets = (tickets, groupBy) => {
+    if (!Array.isArray(tickets)) return {};
+
+    return tickets.reduce((groups, ticket) => {
+      let groupKey = "";
+      if (groupBy === "Status") {
+        groupKey = ticket.status || "Unknown Status";
+      } else if (groupBy === "User") {
+        groupKey = ticket.userId || "No User Assigned";
+      } else if (groupBy === "Priority") {
+        groupKey = ticket.priority || "No Priority";
+      }
+      groups[groupKey] = groups[groupKey] || [];
+      groups[groupKey].push(ticket);
+      return groups;
+    }, {});
+  };
+
+  if (loading) return <div>Loading tickets...</div>;
+  if (error) return <div>{error}</div>;
 
   const groupedTickets = groupTickets(tickets, groupBy);
 
@@ -91,35 +115,25 @@ const KanbanBoard = () => {
       <div className="controls">
         <div className="control-group">
           <label>Group By:</label>
-          <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)}>
-            <option value="Status">
-              <StatusIcon className="icon" /> Status
-            </option>
-            <option value="User">
-              <MenuIcon className="icon" /> User
-            </option>
-            <option value="Priority">
-              <PriorityHigh className="icon" /> Priority
-            </option>
-          </select>
+          <div className="select-with-icon">
+            <StatusIcon className="icon" />
+            <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)}>
+              <option value="Status">Status</option>
+              <option value="User">User</option>
+              <option value="Priority">Priority</option>
+            </select>
+          </div>
         </div>
 
         <div className="control-group">
           <label>Order By:</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="Priority">
-              <PriorityHigh className="icon" /> Priority
-            </option>
-            <option value="Title">
-              <StatusIcon className="icon" /> Title
-            </option>
-            <option value="Down">
-              <DownIcon className="icon" /> Down
-            </option>
-            <option value="Add">
-              <AddIcon className="icon" /> Add
-            </option>
-          </select>
+          <div className="select-with-icon">
+            <PriorityHigh className="icon" />
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="Priority">Priority</option>
+              <option value="Title">Title</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -130,8 +144,8 @@ const KanbanBoard = () => {
             {sortTickets(groupedTickets[group], sortBy).map((ticket) => (
               <div key={ticket.id} className="ticket-card">
                 <h4>{ticket.title}</h4>
-                <p>Priority: {ticket.priority}</p>
-                <p>Status: {ticket.status}</p>
+                <p>Priority: {ticket.priority} {getPriorityIcon(ticket.priority)}</p>
+                <p>Status: {ticket.status} {getStatusIcon(ticket.status)}</p>
               </div>
             ))}
           </div>
